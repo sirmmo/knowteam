@@ -24,7 +24,7 @@ class Membership(models.Model):
 
 class ProfileKnowledge(models.Model):
 	profile = models.ForeignKey(Profile)
-	knowledge = models.ForeignKey(Knowledge)
+	knowledge = models.ForeignKey(Term)
 	level = models.IntegerField()
 
 class ProfileKnowledgeEndorsement(models.Model):

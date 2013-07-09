@@ -1,20 +1,32 @@
 from django.db import models
 
 # Create your models here.
-class Knowledge(models.Model):
-	parent = models.ForeignKey('Knowledge', null=True, blank=True)
+class Term(models.Model):
 	name = models.TextField()
 
 	wikipedia = models.URLField(null=True, blank=True)
 
-	def get_ancestors(self):
-		ancestors = [self]
-		p = self.parent
-		while p is not None:
-			ancestors.append(p)
-			p = p.parent
-		ancestors.reverse()
-		return ancestors
+	primary = models.BooleanField(default=False)
 
-	def path(self, separator="."):
-		return separator.join(self.get_ancestors())
+	def connections(self):
+		p1 = list(Term.objects.starts.all().values())
+		p2 = list(Term.objects.ends.all().values())
+		return p1.extend(p2)
+
+	def  __str__(self):
+		return self.name
+
+class LinkType(models.Model):
+	name = models.TextField()
+
+	def __str__(self):
+		return self.name
+
+class Link(models.Model):
+	a = models.ForeignKey(Term, related_name="starts")
+	b = models.ForeignKey(Term, related_name="ends")
+	name = models.ForeignKey(LinkType)
+	bidirectional = models.BooleanField(default=False)
+
+
+

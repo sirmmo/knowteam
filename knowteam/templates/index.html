@@ -1,105 +1,51 @@
 {% extends "base.html" %}
 
 			{% block head %}
+			<script src="https://rawgithub.com/mbostock/d3/master/d3.min.js"></script>
 <style>
-#image{
-	width:100%;
-	height:200px;
-	background-color:#160768;
-	background-image:url(https://dl.dropbox.com/u/355421/starry.jpg);
-}
 
-center{
-	margin-top:20px;
-	margin-bottom:20px;
-}
-center div{
-	margin-top:2px;
-	margin-bottom:2px;
-}
-
-.question{
-	font-size:1.1em;
-	padding-bottom:15px;
-}
-
-.answer{
-	font-size:1.3em;
-	padding-bottom:15px;
-	}
-
-.user{
-	display:block;
-	float:left;
-	margin-left:10px;
-	margin-right:10px;
-	width:90px;
-	height:102px;
-	border:1px solid #ddd;
-	padding-top:5px;
-	text-align:center;
-}
-
-#user_close{
-clear:both;
-}
 </style>
-<script>				
+<script>	
+
+var width = 960;
+var height = 500;
+
+function resize(){
+	height = $(window).height() - 100;
+	width = $(window).width() - 100;
+
+	$('#kg').width(width);
+	$('#kg').height(height);
+
+}
+$(function(){
+
+	resize();
+
+	var svg = d3.select("#kg").append("svg")
+		.attr("width", width)
+		.attr("height", height);
+
+	var force = d3.layout.force()
+		.gravity(.05)
+		.distance(100)
+		.charge(-100)
+		.size([width, height]);
+
+	d3.json("/kg.json", function(error, json) {
+		force
+			.nodes(json.nodes)
+			.links(json.links)
+			.start();
+	});
+})
+
 </script>
 			{% endblock %}
 
-
-{% block intro %}
-<div id="image">
-	
-</div>
-{% endblock %}
-
-
-{% block header %}
-
-{% endblock header %}
-
-
-
-
 		{% block content%}
 
+<div id="kg"></div>
 
-<center>
-<div class="question">Lost in 1000 stars on your beloved <a href="https://github.com">github</a> account?</div>
-<div class="question">Thinking of cutting your ear looking for that specific library you know you saw and you know starred?</div>
-<div class="answer">GitSign helps you manage your stars and organize them into the starsigns they belong to! </div>
-<div class="answer">You just need to</div>
-<div class="answer" id="login-button"><a href="/login/github/" class="btn btn-large"><i class="icon-github"></i><span>Login with GitHub</span></a></div>
-</center>
-<center>
-</center>
 
-<center>
-<h2>Who's using this?</h2>
-<div class="center">Managing {{repos}} repos for {{users}} users with {{signs}} signs</div>
-<div class="center"><a href="/login/github/" class="btn"><span>Be a new user and bring your repos to the table!</span></a></div>
-<div class="center">
-<center>
-{%for user in latest_users%}
-<div class="user">
-	<div class="icon"><img src="{{user.avatar}}" width="80" height="80"></div>
-	<div class="username"><a href="/u/{{user.user.username}}">{{user.user.username}}</a></div>
-</div>
-{%endfor%}
-<div id="user_close"></div>
-</center>
-</div>
-</center>
-
-<center>
-<h2>Want to help?</h2>
-<div class="center">
-<div>
-<div>If you just want to signal an issue, there's the <a href="https://github.com/sirmmo/gitsign.com/issues">Github Issue list</a>; </div>
-<div>If you want to supply code, <a href="https://github.com/sirmmo/gitsign.com">fork</a> the repo, edit the code and send me a pull request;</div> 
-<div>If you jut want to show appreciation, you can add something to <a href="https://www.gittip.com/sirmmo/">gittip</a>!</div>
-</div></div>
-</center>
 		{% endblock content %}
