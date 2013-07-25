@@ -3,6 +3,7 @@ South==0.8.1
 argparse==1.2.1
 django-social-auth==0.7.23
 django-tastypie==0.9.15
+fyzz==0.1.0
 httplib2==0.8
 mimeparse==0.1.3
 oauth2==1.5.211

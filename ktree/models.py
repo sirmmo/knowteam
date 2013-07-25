@@ -8,6 +8,8 @@ class Term(models.Model):
 
 	primary = models.BooleanField(default=False)
 
+	accepted = models.BooleanField(default=False)
+
 	def connections(self):
 		p1 = list(Term.objects.starts.all().values())
 		p2 = list(Term.objects.ends.all().values())
@@ -27,6 +29,9 @@ class Link(models.Model):
 	b = models.ForeignKey(Term, related_name="ends")
 	name = models.ForeignKey(LinkType)
 	bidirectional = models.BooleanField(default=False)
+
+	def __str__(self):
+		return "%s %s-%s-> %s" % (self.a, "<" if self.bidirectional else "-", self.name, self.b)
 
 
 

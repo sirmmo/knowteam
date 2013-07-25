@@ -1,105 +1,143 @@
 {% extends "base.html" %}
 
 			{% block head %}
+			<script src="http://d3js.org/d3.v3.min.js"></script>
 <style>
-#image{
-	width:100%;
-	height:200px;
-	background-color:#160768;
-	background-image:url(https://dl.dropbox.com/u/355421/starry.jpg);
+.link {
+  stroke: #ccc;
 }
 
-center{
-	margin-top:20px;
-	margin-bottom:20px;
-}
-center div{
-	margin-top:2px;
-	margin-bottom:2px;
-}
-
-.question{
-	font-size:1.1em;
-	padding-bottom:15px;
-}
-
-.answer{
-	font-size:1.3em;
-	padding-bottom:15px;
-	}
-
-.user{
-	display:block;
-	float:left;
-	margin-left:10px;
-	margin-right:10px;
-	width:90px;
-	height:102px;
-	border:1px solid #ddd;
-	padding-top:5px;
-	text-align:center;
-}
-
-#user_close{
-clear:both;
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
 }
 </style>
-<script>				
+<script>	
+
+var width = 960;
+var height = 500;
+
+KG = {};
+
+function resize(){
+	height = $(window).height() - 100;
+	width = $(window).width() - 100;
+
+	$('#kg').width(width);
+	$('#kg').height(height);
+
+}
+
+KG.nodes = [];
+KG.node_ids = [];
+KG.da_ndoes = {};
+KG.links = [];
+KG.link_ids = [];
+
+function update(parent_id){
+	if (parent_id == undefined)
+		url = "/kg.json";
+	else{
+		url = "/kg.json?p="+parent_id+"&k="+JSON.stringify(KG.node_ids);
+	}
+
+	
+	d3.json(url, function(error, json) {
+
+		json['nodes'].forEach(function(d){
+			id = d.id;
+			KG.da_ndoes[id] = d
+		});
+
+		json['links'].forEach(function(d) {
+			if (typeof d.source == "number") { d.source = KG.da_ndoes[d.source]; }
+			if (typeof d.target == "number") { d.target = KG.da_ndoes[d.target]; }
+		});
+
+		json.nodes.forEach(function(d){
+			if (KG.node_ids.indexOf(d.id)<0){
+				KG.node_ids.push(d.id);
+				KG.nodes.push(d);
+			}
+		});
+
+		json.links.forEach(function(d){
+			if (KG.link_ids.indexOf(d.id)<0){
+				KG.link_ids.push(d.id);
+				KG.links.push(d);
+			}
+		});
+
+
+
+		KG.force.nodes(KG.nodes).links(KG.links).start();
+
+		var link = KG.svg.selectAll(".link")
+			.data(KG.links)
+			.enter().append("line")
+			.attr("class", "link");
+
+		var node = KG.svg.selectAll(".node")
+			.data(KG.nodes)
+			.enter().append("g")
+			.attr("class", "node")
+			.call(KG.force.drag);
+
+		node.append("image")
+			.attr("xlink:href", "https://github.com/favicon.ico")
+			.attr("x", -8)
+			.attr("y", -8)
+			.attr("width", 16)
+			.attr("height", 16)
+			.on("click", click)
+			.call(KG.force.drag);
+
+		node.append("text")
+			.attr("dx", 12)
+			.attr("dy", ".35em")
+			.text(function(d) { return d.name });
+
+		  KG.force.on("tick", function() {
+		    link.attr("x1", function(d) { return d.source.x; })
+		        .attr("y1", function(d) { return d.source.y; })
+		        .attr("x2", function(d) { return d.target.x; })
+		        .attr("y2", function(d) { return d.target.y; });
+
+		    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		  });
+	});
+}
+
+function click(d){
+	update(d.id);
+
+	}
+
+$(function(){
+
+	resize();
+
+	KG.svg = d3.select("#kg").append("svg")
+		.attr("width", width)
+		.attr("height", height);
+
+	KG.force = d3.layout.force()
+		.gravity(.05)
+		.distance(100)
+		.charge(-100)
+		.size([width, height]);
+
+	update();
+	
+	
+});
+
 </script>
 			{% endblock %}
 
-
-{% block intro %}
-<div id="image">
-	
-</div>
-{% endblock %}
-
-
-{% block header %}
-
-{% endblock header %}
-
-
-
-
 		{% block content%}
 
+<div id="kg"></div>
 
-<center>
-<div class="question">Lost in 1000 stars on your beloved <a href="https://github.com">github</a> account?</div>
-<div class="question">Thinking of cutting your ear looking for that specific library you know you saw and you know starred?</div>
-<div class="answer">GitSign helps you manage your stars and organize them into the starsigns they belong to! </div>
-<div class="answer">You just need to</div>
-<div class="answer" id="login-button"><a href="/login/github/" class="btn btn-large"><i class="icon-github"></i><span>Login with GitHub</span></a></div>
-</center>
-<center>
-</center>
 
-<center>
-<h2>Who's using this?</h2>
-<div class="center">Managing {{repos}} repos for {{users}} users with {{signs}} signs</div>
-<div class="center"><a href="/login/github/" class="btn"><span>Be a new user and bring your repos to the table!</span></a></div>
-<div class="center">
-<center>
-{%for user in latest_users%}
-<div class="user">
-	<div class="icon"><img src="{{user.avatar}}" width="80" height="80"></div>
-	<div class="username"><a href="/u/{{user.user.username}}">{{user.user.username}}</a></div>
-</div>
-{%endfor%}
-<div id="user_close"></div>
-</center>
-</div>
-</center>
-
-<center>
-<h2>Want to help?</h2>
-<div class="center">
-<div>
-<div>If you just want to signal an issue, there's the <a href="https://github.com/sirmmo/gitsign.com/issues">Github Issue list</a>; </div>
-<div>If you want to supply code, <a href="https://github.com/sirmmo/gitsign.com">fork</a> the repo, edit the code and send me a pull request;</div> 
-<div>If you jut want to show appreciation, you can add something to <a href="https://www.gittip.com/sirmmo/">gittip</a>!</div>
-</div></div>
-</center>
 		{% endblock content %}

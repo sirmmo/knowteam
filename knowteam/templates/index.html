@@ -1,51 +1,65 @@
 {% extends "base.html" %}
 
 			{% block head %}
-			<script src="https://rawgithub.com/mbostock/d3/master/d3.min.js"></script>
 <style>
-
-</style>
-<script>	
-
-var width = 960;
-var height = 500;
-
-function resize(){
-	height = $(window).height() - 100;
-	width = $(window).width() - 100;
-
-	$('#kg').width(width);
-	$('#kg').height(height);
-
+#image{
 }
-$(function(){
 
-	resize();
+center{
+	margin-top:20px;
+	margin-bottom:20px;
+}
+center div{
+	margin-top:2px;
+	margin-bottom:2px;
+}
 
-	var svg = d3.select("#kg").append("svg")
-		.attr("width", width)
-		.attr("height", height);
+.question{
+	font-size:1.1em;
+	padding-bottom:15px;
+}
 
-	var force = d3.layout.force()
-		.gravity(.05)
-		.distance(100)
-		.charge(-100)
-		.size([width, height]);
+.answer{
+	font-size:1.3em;
+	padding-bottom:15px;
+	}
 
-	d3.json("/kg.json", function(error, json) {
-		force
-			.nodes(json.nodes)
-			.links(json.links)
-			.start();
-	});
-})
+.user{
+	display:block;
+	float:left;
+	margin-left:10px;
+	margin-right:10px;
+	width:90px;
+	height:102px;
+	border:1px solid #ddd;
+	padding-top:5px;
+	text-align:center;
+}
 
+#user_close{
+clear:both;
+}
+</style>
+<script>				
 </script>
 			{% endblock %}
 
+
+{% block intro %}
+<div id="image">
+	
+</div>
+{% endblock %}
+
+
+{% block header %}
+
+{% endblock header %}
+
+
+
+
 		{% block content%}
 
-<div id="kg"></div>
-
-
+<center><h1>Knowledge Management is a mess. <br/>Fluid teams make the thing messier. <br/>We are here to help. </h1></center>
 		{% endblock content %}
